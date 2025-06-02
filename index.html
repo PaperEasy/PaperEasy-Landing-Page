@@ -1,0 +1,540 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PaperEasy</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap');
+        
+        :root {
+            --primary: #4361ee;
+            --secondary: #3f37c9;
+            --accent: #4cc9f0;
+            --dark: #2b2d42;
+            --light: #f8f9fa;
+            --success: #4ade80;
+            --warning: #fbbf24;
+            --danger: #f87171;
+            --feature: #7e5bef;
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Poppins', sans-serif;
+        }
+        
+        body {
+            background-color: #f5f7ff;
+            color: var(--dark);
+            overflow-x: hidden;
+            scroll-behavior: smooth;
+        }
+        
+        .fullpage-section {
+            min-height: 100vh;
+            width: 100%;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            padding: 80px 20px;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .section-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            width: 100%;
+        }
+        
+        h1, h2, h3 {
+            font-weight: 700;
+            line-height: 1.2;
+        }
+        
+        h1 {
+            font-size: 3.5rem;
+            margin-bottom: 1.5rem;
+            background: linear-gradient(90deg, var(--primary), var(--accent));
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+        }
+        
+        h2 {
+            font-size: 2.8rem;
+            margin-bottom: 2rem;
+            position: relative;
+            display: inline-block;
+        }
+        
+        h2:after {
+            content: '';
+            position: absolute;
+            bottom: -10px;
+            left: 0;
+            width: 60px;
+            height: 4px;
+            background: var(--primary);
+            border-radius: 2px;
+        }
+        
+        .section-header {
+            text-align: center;
+            margin-bottom: 60px;
+            opacity: 0;
+            transform: translateY(30px);
+            transition: all 0.8s ease-out;
+        }
+        
+        .section-header {
+            text-align: center;
+            margin-bottom: 60px;
+            opacity: 0;
+            transition: all 0.8s ease-out;
+        }
+
+        /* Even sections (Hero, Solutions) slide from LEFT */
+        #hero .section-header {
+            transform: translateX(-100px);
+        }
+        #solutions .section-header {
+            transform: translateX(-100px);
+        }
+
+        /* Odd sections (Problems, Features) slide from RIGHT */
+        #problems .section-header {
+            transform: translateX(100px);
+        }
+        #features .section-header {
+            transform: translateX(100px);
+        }
+
+        /* Cards animation */
+        .problem-card, .solution-card, .feature-card {
+            opacity: 0;
+            transition: all 0.6s cubic-bezier(0.25, 0.8, 0.25, 1);
+            position: relative;
+        }
+
+        /* Even sections: Cards slide from LEFT */
+        #hero .problem-card,
+        #solutions .solution-card {
+            transform: translateX(-50px);
+        }
+
+        /* Odd sections: Cards slide from RIGHT */
+        #problems .problem-card,
+        #features .feature-card {
+            transform: translateX(50px);
+        }
+
+        /* Active state - overrides previous transforms */
+        .section-active .section-header,
+        .section-active .problem-card,
+        .section-active .solution-card,
+        .section-active .feature-card {
+            opacity: 1;
+            transform: translateX(0) !important;
+        }
+
+        /* Delay animations for cards */
+        .section-active .problem-card:nth-child(1),
+        .section-active .solution-card:nth-child(1),
+        .section-active .feature-card:nth-child(1) {
+            transition-delay: 0.2s;
+        }
+        .section-active .problem-card:nth-child(2),
+        .section-active .solution-card:nth-child(2),
+        .section-active .feature-card:nth-child(2) {
+            transition-delay: 0.4s;
+        }
+        .section-active .problem-card:nth-child(3),
+        .section-active .solution-card:nth-child(3),
+        .section-active .feature-card:nth-child(3) {
+            transition-delay: 0.6s;
+        }
+        .section-active .solution-card:nth-child(4) {
+            transition-delay: 0.8s;
+        }
+
+
+        .problems-grid, .solutions-grid, .features-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 30px;
+        }
+    
+        .problems-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(80vw, 1fr));
+            gap: 30px;
+        }
+
+        .solutions-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+            gap: 30px;
+        }
+
+        .problem-card, .solution-card, .feature-card {
+            background: white;
+            border-radius: 16px;
+            padding: 40px 30px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.05);
+            transition: all 0.6s cubic-bezier(0.25, 0.8, 0.25, 1);
+            opacity: 0;
+            transform: translateY(40px);
+            position: relative;
+            overflow: hidden;
+            z-index: 1;
+        }
+        
+        .problem-card {
+            border-top: 4px solid var(--danger);
+        }
+        
+        .solution-card {
+            border-top: 4px solid var(--success);
+        }
+        
+        .feature-card {
+            border-top: 4px solid var(--feature);
+        }
+        
+        .problem-card h3, .solution-card h3, .feature-card h3 {
+            font-size: 1.5rem;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+        }
+        
+        .problem-card h3 i {
+            color: var(--danger);
+            margin-right: 15px;
+            font-size: 1.8rem;
+        }
+        
+        .solution-card h3 i {
+            color: var(--success);
+            margin-right: 15px;
+            font-size: 1.8rem;
+        }
+        
+        .feature-card h3 i {
+            color: var(--feature);
+            margin-right: 15px;
+            font-size: 1.8rem;
+        }
+        
+        .problem-card p, .solution-card p, .feature-card p {
+            color: #64748b;
+            line-height: 1.8;
+            margin-bottom: 20px;
+        }
+        
+        .solution-features, .feature-list {
+            margin-top: 20px;
+        }
+        
+        .solution-features li, .feature-list li {
+            margin-bottom: 10px;
+            display: flex;
+            align-items: flex-start;
+        }
+        
+        .solution-features li i {
+            color: var(--accent);
+            margin-right: 10px;
+            margin-top: 3px;
+        }
+        
+        .feature-list li i {
+            color: var(--feature);
+            margin-right: 10px;
+            margin-top: 3px;
+        }
+        
+        .problem-card:hover, .solution-card:hover, .feature-card:hover {
+            transform: translateY(-10px) scale(1.02);
+            box-shadow: 0 15px 40px rgba(0, 0, 0, 0.1);
+        }
+        
+        .problem-card:hover {
+            background: linear-gradient(135deg, #fff 0%, #fff8f8 100%);
+        }
+        
+        .solution-card:hover {
+            background: linear-gradient(135deg, #fff 0%, #f8fff9 100%);
+        }
+        
+        .feature-card:hover {
+            background: linear-gradient(135deg, #fff 0%, #f8f5ff 100%);
+        }
+        
+        /* Section backgrounds */
+        #hero {
+            background: linear-gradient(135deg, #f5f7ff 0%, #e8ecff 100%);
+            text-align: center;
+        }
+        
+        #problems {
+            background: white;
+        }
+        
+        #solutions {
+            background: linear-gradient(135deg, #f8fff9 0%, #f0f9ff 100%);
+        }
+        
+        #features {
+            background: linear-gradient(135deg, #f9f5ff 0%, #f0f2ff 100%);
+        }
+        
+        /* Floating animation */
+        .floating {
+            animation: floating 6s ease-in-out infinite;
+        }
+        
+        @keyframes floating {
+            0% { transform: translateY(0px); }
+            50% { transform: translateY(-20px); }
+            100% { transform: translateY(0px); }
+        }
+        
+        /* Active state for animations */
+        .section-active .section-header {
+            opacity: 1;
+            transform: translateY(0);
+        }
+        
+        .section-active .problem-card:nth-child(1),
+        .section-active .feature-card:nth-child(1) {
+            opacity: 1;
+            transform: translateY(0);
+            transition-delay: 0.2s;
+        }
+        
+        .section-active .problem-card:nth-child(2),
+        .section-active .feature-card:nth-child(2) {
+            opacity: 1;
+            transform: translateY(0);
+            transition-delay: 0.4s;
+        }
+        
+        .section-active .problem-card:nth-child(3),
+        .section-active .feature-card:nth-child(3) {
+            opacity: 1;
+            transform: translateY(0);
+            transition-delay: 0.6s;
+        }
+        
+        .section-active .solution-card:nth-child(1) {
+            opacity: 1;
+            transform: translateY(0);
+            transition-delay: 0.2s;
+        }
+        
+        .section-active .solution-card:nth-child(2) {
+            opacity: 1;
+            transform: translateY(0);
+            transition-delay: 0.4s;
+        }
+        
+        .section-active .solution-card:nth-child(3) {
+            opacity: 1;
+            transform: translateY(0);
+            transition-delay: 0.6s;
+        }
+        
+        .section-active .solution-card:nth-child(4) {
+            opacity: 1;
+            transform: translateY(0);
+            transition-delay: 0.8s;
+        }
+        
+        /* Scroll indicator */
+        .scroll-down {
+            position: absolute;
+            bottom: 30px;
+            left: 50%;
+            transform: translateX(-50%);
+            color: var(--primary);
+            font-size: 1.5rem;
+            animation: bounce 2s infinite;
+            cursor: pointer;
+            z-index: 10;
+        }
+        
+        @keyframes bounce {
+            0%, 20%, 50%, 80%, 100% { transform: translateY(0) translateX(-50%); }
+            40% { transform: translateY(-20px) translateX(-50%); }
+            60% { transform: translateY(-10px) translateX(-50%); }
+        }
+        
+        /* Responsive adjustments */
+        @media (max-width: 768px) {
+            h1 { font-size: 2.5rem; }
+            h2 { font-size: 2rem; }
+            
+            .problem-card, .solution-card, .feature-card {
+                padding: 30px 20px;
+            }
+            
+            .fullpage-section {
+                padding: 60px 20px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Hero Section -->
+    <section id="hero" class="fullpage-section">
+        <div class="section-container">
+            <div class="section-header floating">
+                <h1>PaperEasy</h1>
+                <p style="color: #64748b; max-width: 700px; margin: 0 auto; font-size: 1.1rem;">
+                    Streamline your academic writing workflow with our powerful tools designed specifically for researchers
+                </p>
+            </div>
+        </div>
+        <div class="scroll-down" onclick="document.getElementById('problems').scrollIntoView({behavior: 'smooth'})">
+            <i class="fas fa-chevron-down"></i>
+        </div>
+    </section>
+    
+    <!-- Problems Section -->
+    <section id="problems" class="fullpage-section">
+        <div class="section-container">
+            <h2 class="section-header">The Problems Researchers Face</h2>
+            <div class="problems-grid">
+                <div class="problem-card">
+                    <h3><i class="fas fa-hourglass-half"></i> Manual Re-formatting</h3>
+                    <p>Manually converting manuscripts to each conference's LaTeX template takes hours, causing delays and errors.</p>
+                </div>
+                
+                <div class="problem-card">
+                    <h3><i class="fas fa-random"></i> Editing Workflow</h3>
+                    <p>Researchers switch between editors, previews, and AI tools, losing focus and introducing integration gaps.</p>
+                </div>
+                
+                <div class="problem-card">
+                    <h3><i class="fas fa-check-double"></i> Compliance Verification</h3>
+                    <p>Researchers need to manually double-check their papers to ensure they meet submission guidelines, avoiding the risk of rejection.</p>
+                </div>
+            </div>
+        </div>
+        <div class="scroll-down" onclick="document.getElementById('solutions').scrollIntoView({behavior: 'smooth'})">
+            <i class="fas fa-chevron-down"></i>
+        </div>
+    </section>
+    
+    <!-- Solutions Section -->
+    <section id="solutions" class="fullpage-section">
+        <div class="section-container">
+            <h2 class="section-header">Our Solutions</h2>
+            <div class="solutions-grid">
+                <div class="solution-card">
+                    <h3><i class="fas fa-exchange-alt"></i> LaTeX Formating</h3>
+                    <p>Automatically parse your document and seamlessly apply the formatting rules of a selected LaTeX template.</p>
+                    <ul class="solution-features">
+                        <li><i class="fas fa-check-circle"></i> Adjusting margins, font styles, heading levels, figure placements</li>
+                        <li><i class="fas fa-check-circle"></i> Preserve all content and structure</li>
+                    </ul>
+                </div>
+                
+                <div class="solution-card">
+                    <h3><i class="fas fa-robot"></i> AI Assistant</h3>
+                    <p>An assistant that interprets prompts and applies code changes accordingly (e.g., "reduce figure caption font size").</p>
+                    <ul class="solution-features">
+                        <li><i class="fas fa-check-circle"></i> Natural language processing</li>
+                        <li><i class="fas fa-check-circle"></i> Style alignment commands</li>
+                    </ul>
+                </div>
+                
+                <div class="solution-card">
+                    <h3><i class="fas fa-code"></i> Live Compiler</h3>
+                    <p>Integrated live editor with side-by-side LaTeX code and PDF preview powered by our local compiler.</p>
+                    <ul class="solution-features">
+                        <li><i class="fas fa-check-circle"></i> Eliminates context-switching</li>
+                        <li><i class="fas fa-check-circle"></i> Real-time error detection</li>
+                    </ul>
+                </div>
+                
+                <div class="solution-card">
+                    <h3><i class="fas fa-clipboard-check"></i> Compliance Checker</h3>
+                    <p>Analyzes the compiled PDF against conference-specific rules and flags any violations in advance.</p>
+                    <ul class="solution-features">
+                        <li><i class="fas fa-check-circle"></i> Page count verification</li>
+                        <li><i class="fas fa-check-circle"></i> Style requirements validation</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+        <div class="scroll-down" onclick="document.getElementById('features').scrollIntoView({behavior: 'smooth'})">
+            <i class="fas fa-chevron-down"></i>
+        </div>
+    </section>
+
+    <!-- Features Section -->
+    <section id="features" class="fullpage-section">
+        <div class="section-container">
+            <h2 class="section-header">Key Features</h2>
+            <div class="features-grid">
+                <div class="feature-card">
+                    <h3><i class="fas fa-file-upload"></i> Format from Scratch</h3>
+                    <p>Convert your existing documents into perfectly formatted LaTeX templates with AI assistance.</p>
+                    <ul class="feature-list">
+                        <li><i class="fas fa-check"></i> Upload DOCX or PDF files</li>
+                        <li><i class="fas fa-check"></i> Convert to conference templates</li>
+                        <li><i class="fas fa-check"></i> AI-powered section refinement</li>
+                    </ul>
+                </div>
+                
+                <div class="feature-card">
+                    <h3><i class="fas fa-exchange-alt"></i> Between-Template Conversion</h3>
+                    <p>Easily switch between different LaTeX templates while preserving all your content.</p>
+                    <ul class="feature-list">
+                        <li><i class="fas fa-check"></i> Upload LaTeX or structured versions</li>
+                        <li><i class="fas fa-check"></i> Convert between templates (e.g., IEEE to Springer)</li>
+                        <li><i class="fas fa-check"></i> Retain structure and metadata</li>
+                    </ul>
+                </div>
+                
+                <div class="feature-card">
+                    <h3><i class="fas fa-clipboard-check"></i> Compliance Checker</h3>
+                    <p>Ensure your paper meets all submission requirements before you submit.</p>
+                    <ul class="feature-list">
+                        <li><i class="fas fa-check"></i> Upload your .tex project</li>
+                        <li><i class="fas fa-check"></i> Cross-check against guidelines</li>
+                        <li><i class="fas fa-check"></i> Get fix suggestions and summary</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <script>
+        // Intersection Observer - Updated for left/right animations
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    entry.target.classList.add('section-active');
+                    observer.unobserve(entry.target);
+                }
+            });
+        }, { threshold: 0.3 }); // Reduced threshold for earlier trigger
+
+        // Observe all sections
+        document.querySelectorAll('section').forEach(section => {
+            observer.observe(section);
+        });
+
+        // Immediately show hero content
+        document.querySelector('#hero').classList.add('section-active');
+    </script>   
+</body>
+</html>
